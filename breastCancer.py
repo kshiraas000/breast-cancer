@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 
 import tensorflow as tf
@@ -47,6 +47,17 @@ plt.figure(figsize=(12, 8))
 plot_tree(model, feature_names=X.columns, class_names=['Benign', 'Malignant'], filled=True)
 plt.show()
 
+# Calculate the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Class')
+plt.ylabel('True Class')
+plt.title('Confusion Matrix (Decision Tree)')
+plt.show()
+
 # Evaluate the model
 accuracy = accuracy_score(y_test, y_pred)
 print("Test accuracy Decision Tree:", accuracy)
@@ -57,6 +68,17 @@ model.fit(X_train, y_train)
 
 # Make predictions on the test set
 y_pred = model.predict(X_test)
+
+# Calculate the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Class')
+plt.ylabel('True Class')
+plt.title('Confusion Matrix (Random Forest)')
+plt.show()
 
 # Evaluate the model
 accuracy = accuracy_score(y_test, y_pred)
@@ -98,6 +120,17 @@ early_stopping = EarlyStopping(patience=5, restore_best_weights=True)
 # Train the model
 history = model.fit(X_train_scaled, y_train, validation_data=(X_test_scaled, y_test),
                     epochs=2, batch_size=10, callbacks=[early_stopping])
+
+# Calculate the confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot the confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted Class')
+plt.ylabel('True Class')
+plt.title('Confusion Matrix (Neural Network Tree)')
+plt.show()
 
 # Evaluate the model
 loss, accuracy = model.evaluate(X_test_scaled, y_test)
