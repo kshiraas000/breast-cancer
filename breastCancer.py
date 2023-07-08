@@ -1,14 +1,16 @@
+
 import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
 #import plotly.express as px
 
+from sklearn.decomposition import PCA, FastICA
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix
-
 
 import tensorflow as tf
 from sklearn.preprocessing import StandardScaler
@@ -18,12 +20,8 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 
 
-
 # Load the dataset
 data = pd.read_csv('breastCancerData.csv')
-data.head()
-
-#px.histogram(data_frame=data, x='diagnosis', color='diagnosis',color_discrete_sequence=['#A865C9','#f6abb6'])
 
 # Separate features (X) and target variable (y)
 X = data.iloc[:, 2:]  # Exclude ID column and use all numeric columns for features
@@ -41,11 +39,6 @@ model.fit(X_train, y_train)
 
 # Make predictions on the test set
 y_pred = model.predict(X_test)
-
-# Plot the decision tree
-plt.figure(figsize=(12, 8))
-plot_tree(model, feature_names=X.columns, class_names=['Benign', 'Malignant'], filled=True)
-plt.show()
 
 # Calculate the confusion matrix
 cm = confusion_matrix(y_test, y_pred)
@@ -95,20 +88,6 @@ model.add(Dense(64, activation='relu', input_shape=(X_train_scaled.shape[1],)))
 model.add(Dropout(0.2))
 model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation='relu'))
-model.add(Dropout(0.2))
 model.add(Dense(1, activation='sigmoid'))
 
 # Compile the model
@@ -119,7 +98,7 @@ early_stopping = EarlyStopping(patience=5, restore_best_weights=True)
 
 # Train the model
 history = model.fit(X_train_scaled, y_train, validation_data=(X_test_scaled, y_test),
-                    epochs=2, batch_size=10, callbacks=[early_stopping])
+                    epochs=10, batch_size=64, callbacks=[early_stopping])
 
 # Calculate the confusion matrix
 cm = confusion_matrix(y_test, y_pred)
@@ -129,7 +108,7 @@ plt.figure(figsize=(8, 6))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues')
 plt.xlabel('Predicted Class')
 plt.ylabel('True Class')
-plt.title('Confusion Matrix (Neural Network Tree)')
+plt.title('Confusion Matrix (Neural Network)')
 plt.show()
 
 # Evaluate the model
@@ -137,11 +116,64 @@ loss, accuracy = model.evaluate(X_test_scaled, y_test)
 print("Test Loss:", loss)
 print("Test Accuracy:", accuracy)
 
-# Plot the training and validation accuracy over epochs
-plt.plot(history.history['accuracy'], label='Training Accuracy')
-plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.title('Training and Validation Accuracy')
-plt.legend()
+
+# plt.scatter(X_pca[:, 0], X_pca[:, 1], c=y, cmap='coolwarm')
+# plt.xlabel('Principal Component 1')
+# plt.ylabel('Principal Component 2')
+# plt.title('PCA - Breast Cancer Data')
+# plt.show()
+
+# # Apply ICA to visualize feature importance
+# ica = FastICA(n_components=2)
+# X_ica = ica.fit_transform(X)
+
+# plt.scatter(X_ica[:, 0], X_ica[:, 1], c=y, cmap='coolwarm')
+# plt.xlabel('Independent Component 1')
+# plt.ylabel('Independent Component 2')
+# plt.title('ICA - Breast Cancer Data')
+# plt.show()
+
+fig, axes = plt.subplots(1, 2)
+
+# Plot before PCA
+axes[0].scatter(X.iloc[:, 0], X.iloc[:, 1], c=y)
+axes[0].set_xlabel('Feature 1')
+axes[0].set_ylabel('Feature 2')
+axes[0].set_title('Before PCA')
+
+# Apply PCA to visualize feature importance
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+# Plot after PCA
+axes[1].scatter(X_pca[:, 0], X_pca[:, 1], c=y)
+axes[1].set_xlabel('Principal Component 1')
+axes[1].set_ylabel('Principal Component 2')
+axes[1].set_title('After PCA')
+
+plt.tight_layout()
 plt.show()
+
+
+
+fig, axes = plt.subplots(1, 2)
+
+# Plot before ICA
+axes[0].scatter(X.iloc[:, 0], X.iloc[:, 1], c=y)
+axes[0].set_xlabel('Feature 1')
+axes[0].set_ylabel('Feature 2')
+axes[0].set_title('Before ICA')
+
+# Apply ICA to visualize feature importance
+ica = FastICA(n_components=2)
+X_ica = ica.fit_transform(X)
+
+# Plot after ICA
+axes[1].scatter(X_ica[:, 0], X_ica[:, 1], c=y)
+axes[1].set_xlabel('Independent Component 1')
+axes[1].set_ylabel('Independent Component 2')
+axes[1].set_title('After ICA')
+
+plt.tight_layout()
+plt.show()
+
